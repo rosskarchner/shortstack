@@ -5,8 +5,11 @@ from jinja2.loaders import FileSystemLoader
 
 from .views import handle_request
 from .filesystem import relative_urls_from_filesystem
+from .routing import SSMap
 from .url_manipulation import path_in_patterns, prepend_url
 from .utility import build_search_path
+from .config import configuration
+from .extensions.loader import load_extensions
 
 
 DEFAULT_IGNORE = ['_layouts/*', '_settings/*']
@@ -25,6 +28,18 @@ class Shortstack(flask.Flask):
 
         super(Shortstack, self).__init__(*args, **kwargs)
 
+        extension_config = self.get_configuration('extensions', optional=True)
+        self.ss_extensions = load_extensions(extension_config)
+        rules = []
+        for ext in self.ss_extensions:
+            for rule in ext.context_extenders:
+                rules.append(rule)
+
+            for blueprint_func in ext.flask_blueprints:
+                self.register_blueprints_from_dict(blueprint_func())
+
+
+        self.context_map = SSMap(rules)
         template_search_path = [self.join_path('_layouts'),
                                 self.join_path('_includes')]
 
@@ -39,6 +54,22 @@ class Shortstack(flask.Flask):
         @self.errorhandler(404)
         def _(e):
             return handle_request()
+
+    def register_blueprints_from_dict(self, blueprints):
+        for key, value in blueprints.iteritems():
+            package = value['package']
+            module = value['module']
+
+            # Using a less elegant way of doing dynamic imports to support 2.6
+            try:
+                blueprint = __import__(package, fromlist=[module])
+            except ImportError:
+                print "Error importing package {0}".format(key)
+                continue
+            self.register_blueprint(getattr(blueprint, module))
+
+    def get_configuration(self, config_name, optional=False):
+        return configuration(config_name, config_directory=self.join_path('_settings'), optional=optional)
 
     def should_ignore_path(self, path):
         ignore_patterns = itertools.chain(DEFAULT_IGNORE, self.ignore_patterns)

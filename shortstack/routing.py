@@ -1,16 +1,17 @@
-from werkzeug.routing import Rule, DEFAULT_CONVERTERS
+from werkzeug.routing import DEFAULT_CONVERTERS
+from fnmatch import fnmatch
 
+class MatchEverything():
 
-class SSRule(Rule):
-    """
-    Rule subclass that adds an attribute for an attched callable.
-    """
-    def __init__(self, *args, **kwargs):
-        self.callable = kwargs.get('callable')
-        if self.callable:
-            del kwargs['callable']
-        super(SSRule, self).__init__(*args, **kwargs)
+    def __init__(self, endpoint):
+        self.endpoint = endpoint
+        self.map = None
 
+    def match(self, path):
+        return {}
+
+    def bind(self, map):
+        self.map=map
 
 class SSMap(object):
     """
@@ -24,7 +25,7 @@ class SSMap(object):
     converters = DEFAULT_CONVERTERS
     rules = []
 
-    def __init__(self, rules):
+    def __init__(self, rules=[]):
         for rule in rules:
             rule.bind(self)
             self.rules.append(rule)

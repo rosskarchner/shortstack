@@ -35,7 +35,7 @@ def configuration(config_name, config_directory=None, optional=False):
         with open(config_path) as config_file:
             return json.load(config_file)
     elif optional:
-        return {}
+        return None
 
     raise ConfigMissing("No configuration %s.json in %s" % (config_name,
                                                             config_directory))

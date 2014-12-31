@@ -23,13 +23,19 @@ def handle_request():
 
     template_candidates = [translated_path]
 
+
+    template_context = {}
+
+    context_rule_matches = app.context_map.multimatch(request.path)
+    for match, arguments in context_rule_matches:
+        result = match.endpoint(**arguments)
+        template_context.update(result)
     try:
 
         template_path = next(
             t for t in template_candidates if os.path.isfile(t))
 
         if os.path.exists(template_path):
-            template_context = {}
 
             with codecs.open(template_path, encoding="utf-8") as template_source:
                 return flask.make_response(flask.render_template_string(template_source.read(), **template_context),200)

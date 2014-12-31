@@ -1,4 +1,5 @@
 import shortstack.routing
+from werkzeug.routing import Rule as URLRule
 
 try:
     import unittest2 as unittest
@@ -10,8 +11,8 @@ class TestRouting(unittest.TestCase):
 
     def setUp(self):
 
-        self.rule = shortstack.routing.SSRule('/agents/<name>.html',
-                                              callable=type)
+        self.rule = URLRule('/agents/<name>.html',
+                            endpoint=type)
 
         self.ssmap = shortstack.routing.SSMap([self.rule])
 

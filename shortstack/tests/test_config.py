@@ -35,4 +35,4 @@ class TestConfiguration(unittest.TestCase):
         configuration = config.configuration('missing',
                                              config_directory=self.test_config_directory,
                                              optional=True)
-        self.assertIsInstance(configuration, dict)
+        self.assertEqual(configuration, None)
