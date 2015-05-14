@@ -7,6 +7,7 @@ def start(args, config):
     debug = config['debug']
     application = Shortstack('shortstack',
                              instance_path=location,
+                             extensions=config['extensions'],
                              url_root=url_root)
 
     if debug:

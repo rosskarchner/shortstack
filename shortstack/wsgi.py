@@ -1,5 +1,6 @@
 import itertools
 
+
 import flask
 from jinja2.loaders import FileSystemLoader
 
@@ -26,10 +27,15 @@ class Shortstack(flask.Flask):
         # when translating URL paths to the filesystem
         self.trim_from_paths = len(self.url_root) - 1
 
+        extensions_invoked_with = kwargs.pop('extensions')
+
         super(Shortstack, self).__init__(*args, **kwargs)
 
-        extension_config = self.get_configuration('extensions', optional=True)
-        self.ss_extensions = load_extensions(extension_config)
+        extensions_config = self.get_configuration('extensions', optional=True)  or []
+        extensions_names = extensions_config + extensions_invoked_with
+
+        self.ss_extensions = load_extensions(extensions_names)
+
         rules = []
         for ext in self.ss_extensions:
             for rule in ext.context_extenders:

@@ -13,6 +13,13 @@ URL_ROOT = os.environ.get('SS_URL_ROOT', '/')
 DEBUG = bool(os.environ.get('SS_DEBUG', False))
 
 
+def comma_seperated_list(str):
+    """
+    Converts a comma-delimited string to a list
+    Useful as the "type" argument to add_argument
+    """
+    return str.split(',')
+
 def add_builder_subparser(subparsers):
     """
     Create the subparser for 'shorts build'
@@ -71,6 +78,13 @@ def apply_universal_arguments(subparser):
         help="url root for the files in this project")
 
 
+    subparser.add_argument(
+        '--extensions',
+        '-e',
+        default='',
+        type=comma_seperated_list,
+        help="Extensions to enable")
+
 def run_cli():
     """This is the command line interface to shortstack"""
     parser = ArgumentParser(prog='shorts',
@@ -90,6 +104,7 @@ def run_cli():
     if hasattr(arguments, 'func'):
         config = dict(debug=arguments.debug,
                       location=os.path.join(os.getcwd(), arguments.location),
+                      extensions=arguments.extensions,
                       url_root=arguments.url)
         arguments.func(arguments, config)
     else:

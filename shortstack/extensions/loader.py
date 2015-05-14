@@ -4,11 +4,17 @@ import os
 import sys
 
 from importlib import import_module
+from pkg_resources import iter_entry_points
 
 from .api import Extension
 
 sys.path.append(os.getcwd())
 
+
+available_extensions = {}
+
+for ext_mod in iter_entry_points(group='shortstack_ext', name=None):
+    available_extensions[ext_mod.name] = ext_mod.load()
 
 def extensions_from_module(mod):
     mod_ns = inspect.getmembers(mod)
@@ -18,7 +24,7 @@ def extensions_from_module(mod):
 
 def extensions_from_name(name):
     try:
-        mod = import_module(name)
+        mod = available_extensions.get(name)
         return extensions_from_module(mod)
     except ImportError:
         warnings.warn("could not load extension '%s', but continuing" % name)

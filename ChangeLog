@@ -1,6 +1,7 @@
 CHANGES
 =======
 
+* Initial extensions implementation
 * Minor test improvements
 * Improvements to static site generator
 * Added information about building static sites
