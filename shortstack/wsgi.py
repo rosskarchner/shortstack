@@ -1,3 +1,4 @@
+import os
 import itertools
 
 
@@ -34,6 +35,7 @@ class Shortstack(flask.Flask):
         extensions_config = self.get_configuration('extensions', optional=True)  or []
         extensions_names = extensions_config + extensions_invoked_with
 
+        os.environ['SS_ROOT_DIR'] = kwargs['instance_path']
         self.ss_extensions = load_extensions(extensions_names)
 
         rules = []
