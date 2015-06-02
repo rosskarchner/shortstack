@@ -51,7 +51,19 @@ class Shortstack(flask.Flask):
         template_search_path = [self.join_path('_layouts'),
                                 self.join_path('_includes')]
 
-        self.jinja_loader = FileSystemLoader(template_search_path)
+        @self.errorhandler(404)
+        def _(e):
+            return handle_request()
+
+    @property
+    def jinja_loader(self, *args, **kwargs):
+        request = flask.request
+        search_path = build_search_path(self.instance_path,
+                                        request.path,
+                                        append=['_layouts', '_includes'],
+                                        include_start_directory=True)
+
+        return FileSystemLoader(search_path)
 
         try:
             with self.open_instance_resource('.ssignore') as ignorefile:
@@ -59,9 +71,6 @@ class Shortstack(flask.Flask):
         except IOError:
             self.ignore_patterns = []
 
-        @self.errorhandler(404)
-        def _(e):
-            return handle_request()
 
     def register_blueprints_from_dict(self, blueprints):
         for key, value in blueprints.iteritems():
